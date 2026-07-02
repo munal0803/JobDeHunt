@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Finder Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --green: #4ade80;
+      --input-bg: #0f172a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    header { margin-bottom: 1.5rem; }
+
+    h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .subtitle { color: var(--muted); font-size: 0.95rem; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.85rem;
+      margin: 1.25rem 0 1.5rem;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    .stat-value.small { font-size: 0.95rem; font-weight: 600; }
+
+    .filter-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .filter-panel h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.9rem;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .filter-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+      align-items: center;
+    }
+
+    .btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .result-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .result-bar strong { color: var(--accent); }
+
+    .pipeline-info {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .pipeline-info strong { color: var(--text); }
+
+    .jobs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .job-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.15rem 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      transition: border-color 0.15s, opacity 0.15s;
+    }
+
+    .job-card:hover { border-color: var(--accent); }
+    .job-card.hidden { display: none; }
+
+    .job-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem; }
+
+    .job-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.25rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .job-meta span::before { content: "• "; color: var(--border); }
+    .job-meta span:first-child::before { content: ""; }
+
+    .company { color: var(--accent); font-weight: 500; }
+    .posted { color: var(--green); font-size: 0.85rem; }
+    .saved-at { color: var(--muted); font-size: 0.8rem; }
+
+    .apply-btn {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--bg);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .apply-btn:hover { background: var(--accent-hover); }
+
+    .job-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .mark-applied-btn,
+    .undo-applied-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .mark-applied-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .undo-applied-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .section-block {
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .section-count {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .job-card.applied-card {
+      border-color: #166534;
+      background: #13261d;
+    }
+
+    .applied-badge {
+      display: inline-block;
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--green);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      margin-bottom: 0.45rem;
+    }
+
+    .applied-at {
+      color: var(--green);
+      font-size: 0.8rem;
+    }
+
+    .section-empty {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      display: none;
+    }
+
+    .empty, .no-results {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+    }
+
+    .empty code, .no-results code {
+      background: var(--bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .no-results { display: none; }
+
+    @media (max-width: 640px) {
+      .job-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Job Finder Dashboard</h1>
+      <p class="subtitle">Search and filter saved jobs from your automation scan</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total in DB</div>
+        <div class="stat-value">{{ total }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Open jobs</div>
+        <div class="stat-value" id="open-count">{{ open_count }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Applied</div>
+        <div class="stat-value" id="applied-count">{{ applied_count }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Showing</div>
+        <div class="stat-value" id="showing-count">{{ open_count }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Last scan</div>
+        <div class="stat-value small">{{ last_scan or "—" }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Companies</div>
+        <div class="stat-value">{{ companies|length }}</div>
+      </div>
+    </div>
+
+    <div class="pipeline-info">
+      <strong>Scan pipeline:</strong>
+      Posted within {{ max_posted_days }} day(s) → Top {{ top_jobs_limit }} recent → Title + location match
+    </div>
+
+    {% if open_jobs or applied_jobs %}
+    <div class="filter-panel">
+      <h2>
+        Filter jobs
+        <button class="btn" type="button" id="clear-filters">Clear all</button>
+      </h2>
+      <div class="filter-grid">
+        <div class="field">
+          <label for="search-title">Job title / name</label>
+          <input type="text" id="search-title" placeholder="e.g. Software Engineer">
+        </div>
+        <div class="field">
+          <label for="search-keyword">Keyword (title)</label>
+          <input type="text" id="search-keyword" placeholder="e.g. python, data, AI">
+        </div>
+        <div class="field">
+          <label for="filter-company">Company</label>
+          <select id="filter-company">
+            <option value="">All companies</option>
+            {% for company in companies %}
+            <option value="{{ company }}">{{ company }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="filter-location">Location</label>
+          <select id="filter-location">
+            <option value="">All locations</option>
+            {% for loc in locations %}
+            <option value="{{ loc }}">{{ loc }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="filter-posted">Posted time</label>
+          <select id="filter-posted">
+            <option value="">Any time</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="2days">Last 2 days</option>
+            <option value="7days">Last 7 days</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filter-saved">Saved / scanned</label>
+          <select id="filter-saved">
+            <option value="">Any time</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="7days">Last 7 days</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sort-by">Sort by</label>
+          <select id="sort-by">
+            <option value="posted-asc" selected>Posted: newest first</option>
+            <option value="saved-desc">Newest saved first</option>
+            <option value="company-asc">Company A → Z</option>
+            <option value="title-asc">Title A → Z</option>
+            <option value="location-asc">Location A → Z</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-bar">
+      <span>Showing <strong id="result-text">{{ open_count }}</strong> of {{ open_count }} open jobs</span>
+    </div>
+
+    <section class="section-block">
+      <div class="section-header">
+        <h2>Open Jobs</h2>
+        <span class="section-count"><span id="open-visible-count">{{ open_count }}</span> shown</span>
+      </div>
+
+      <div class="jobs" id="open-jobs-list">
+        {% for job in open_jobs %}
+        <article class="job-card"
+          data-job-id="{{ job.id }}"
+          data-job-url="{{ job.url }}"
+          data-title="{{ job.title|lower }}"
+          data-company="{{ job.company|lower }}"
+          data-location="{{ job.location|lower }}"
+          data-posted="{{ job.posted_on|lower }}"
+          data-saved="{{ job.saved_at }}"
+          data-posted-days="{{ job.posted_on }}"
+          data-saved-ts="{{ job.saved_at }}">
+          <div>
+            <div class="job-title">{{ job.title }}</div>
+            <div class="job-meta">
+              <span class="company">{{ job.company }}</span>
+              <span>{{ job.location }}</span>
+              {% if job.posted_on %}
+              <span class="posted">{{ job.posted_on }}</span>
+              {% endif %}
+              {% if job.saved_at %}
+              <span class="saved-at">Saved {{ job.saved_at }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="job-actions">
+            <a class="apply-btn" href="{{ job.url }}" target="_blank" rel="noopener noreferrer">Apply →</a>
+            <button class="mark-applied-btn" type="button" data-action="apply">Mark as Applied</button>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+
+      <div class="section-empty" id="open-empty" {% if open_jobs %}style="display:none;"{% endif %}>
+        <p>No open jobs match your filters.</p>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-header">
+        <h2>Applied Jobs</h2>
+        <span class="section-count"><span id="applied-visible-count">{{ applied_count }}</span> total</span>
+      </div>
+
+      <div class="jobs" id="applied-jobs-list">
+        {% for job in applied_jobs %}
+        <article class="job-card applied-card"
+          data-job-id="{{ job.id }}"
+          data-job-url="{{ job.url }}"
+          data-title="{{ job.title|lower }}"
+          data-company="{{ job.company|lower }}"
+          data-location="{{ job.location|lower }}"
+          data-posted="{{ job.posted_on|lower }}"
+          data-saved="{{ job.saved_at }}"
+          data-applied-at="{{ job.applied_at }}">
+          <div>
+            <div class="applied-badge">Applied</div>
+            <div class="job-title">{{ job.title }}</div>
+            <div class="job-meta">
+              <span class="company">{{ job.company }}</span>
+              <span>{{ job.location }}</span>
+              {% if job.posted_on %}
+              <span class="posted">{{ job.posted_on }}</span>
+              {% endif %}
+              {% if job.applied_at %}
+              <span class="applied-at">Applied {{ job.applied_at }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="job-actions">
+            <a class="apply-btn" href="{{ job.url }}" target="_blank" rel="noopener noreferrer">View Job →</a>
+            <button class="undo-applied-btn" type="button" data-action="undo">Move Back to Open</button>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+
+      <div class="section-empty" id="applied-empty" {% if applied_jobs %}style="display:none;"{% endif %}>
+        <p>No applied jobs yet. Mark a job as applied to track it here.</p>
+      </div>
+    </section>
+    {% else %}
+    <div class="empty">
+      <p>No jobs in the database yet.</p>
+      <p style="margin-top:0.75rem;">Run <code>python main.py</code> to scan and save matching jobs.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if open_jobs or applied_jobs %}
+  <script>
+    const openJobsList = document.getElementById("open-jobs-list");
+    const appliedJobsList = document.getElementById("applied-jobs-list");
+    const openCards = () => Array.from(openJobsList.querySelectorAll(".job-card"));
+    const appliedCards = () => Array.from(appliedJobsList.querySelectorAll(".job-card"));
+
+    const showingCount = document.getElementById("showing-count");
+    const resultText = document.getElementById("result-text");
+    const openCountEl = document.getElementById("open-count");
+    const appliedCountEl = document.getElementById("applied-count");
+    const openVisibleCountEl = document.getElementById("open-visible-count");
+    const appliedVisibleCountEl = document.getElementById("applied-visible-count");
+    const openEmpty = document.getElementById("open-empty");
+    const appliedEmpty = document.getElementById("applied-empty");
+
+    const searchTitle = document.getElementById("search-title");
+    const searchKeyword = document.getElementById("search-keyword");
+    const filterCompany = document.getElementById("filter-company");
+    const filterLocation = document.getElementById("filter-location");
+    const filterPosted = document.getElementById("filter-posted");
+    const filterSaved = document.getElementById("filter-saved");
+    const sortBy = document.getElementById("sort-by");
+    const clearBtn = document.getElementById("clear-filters");
+
+    function parsePostedDays(text) {
+      if (!text) return 999;
+      const t = text.toLowerCase();
+      if (t.includes("today")) return 0;
+      if (t.includes("yesterday")) return 1;
+      const match = t.match(/(\d+)\s*days?\s*ago/);
+      if (match) return parseInt(match[1], 10);
+      const dateMatch = t.match(/(\d{4}-\d{2}-\d{2})/);
+      if (dateMatch) {
+        const posted = new Date(dateMatch[1]);
+        const now = new Date();
+        return Math.floor((now - posted) / (1000 * 60 * 60 * 24));
+      }
+      return 999;
+    }
+
+    function parseSavedDays(savedAt) {
+      if (!savedAt) return 999;
+      const saved = new Date(savedAt);
+      const now = new Date();
+      return Math.floor((now - saved) / (1000 * 60 * 60 * 24));
+    }
+
+    function matchesPostedFilter(postedText, filter) {
+      if (!filter) return true;
+      const days = parsePostedDays(postedText);
+      if (filter === "today") return days === 0;
+      if (filter === "yesterday") return days === 1;
+      if (filter === "2days") return days <= 2;
+      if (filter === "7days") return days <= 7;
+      return true;
+    }
+
+    function matchesSavedFilter(savedAt, filter) {
+      if (!filter) return true;
+      const days = parseSavedDays(savedAt);
+      if (filter === "today") return days === 0;
+      if (filter === "yesterday") return days === 1;
+      if (filter === "7days") return days <= 7;
+      return true;
+    }
+
+    function sortCards(cards, listEl) {
+      const sort = sortBy.value;
+      cards.sort((a, b) => {
+        if (sort === "saved-desc") {
+          return (b.dataset.saved || "").localeCompare(a.dataset.saved || "");
+        }
+        if (sort === "posted-asc") {
+          return parsePostedDays(a.dataset.posted) - parsePostedDays(b.dataset.posted);
+        }
+        if (sort === "company-asc") {
+          return a.dataset.company.localeCompare(b.dataset.company);
+        }
+        if (sort === "title-asc") {
+          return a.dataset.title.localeCompare(b.dataset.title);
+        }
+        if (sort === "location-asc") {
+          return a.dataset.location.localeCompare(b.dataset.location);
+        }
+        return 0;
+      });
+      cards.forEach(card => listEl.appendChild(card));
+    }
+
+    function updateCounts(openVisible) {
+      const openTotal = openCards().length;
+      const appliedTotal = appliedCards().length;
+
+      showingCount.textContent = openVisible;
+      resultText.textContent = openVisible;
+      openCountEl.textContent = openTotal;
+      appliedCountEl.textContent = appliedTotal;
+      openVisibleCountEl.textContent = openVisible;
+      appliedVisibleCountEl.textContent = appliedTotal;
+
+      openEmpty.style.display = openVisible === 0 ? "block" : "none";
+      openJobsList.style.display = openVisible === 0 ? "none" : "flex";
+      appliedEmpty.style.display = appliedTotal === 0 ? "block" : "none";
+      appliedJobsList.style.display = appliedTotal === 0 ? "none" : "flex";
+    }
+
+    function applyFilters() {
+      const titleQ = searchTitle.value.trim().toLowerCase();
+      const keywordQ = searchKeyword.value.trim().toLowerCase();
+      const companyQ = filterCompany.value.toLowerCase();
+      const locationQ = filterLocation.value.toLowerCase();
+      const postedQ = filterPosted.value;
+      const savedQ = filterSaved.value;
+
+      let visible = 0;
+
+      openCards().forEach(card => {
+        const title = card.dataset.title;
+        const company = card.dataset.company;
+        const location = card.dataset.location;
+        const posted = card.dataset.posted;
+        const saved = card.dataset.saved;
+
+        let show = true;
+
+        if (titleQ && !title.includes(titleQ)) show = false;
+        if (keywordQ && !title.includes(keywordQ)) show = false;
+        if (companyQ && company !== companyQ) show = false;
+        if (locationQ && location !== locationQ) show = false;
+        if (!matchesPostedFilter(posted, postedQ)) show = false;
+        if (!matchesSavedFilter(saved, savedQ)) show = false;
+
+        card.classList.toggle("hidden", !show);
+        if (show) visible++;
+      });
+
+      const visibleCards = openCards().filter(c => !c.classList.contains("hidden"));
+      sortCards(visibleCards, openJobsList);
+      updateCounts(visible);
+    }
+
+    function buildAppliedCard(card) {
+      card.classList.add("applied-card");
+      card.classList.remove("hidden");
+
+      const content = card.querySelector("div");
+      if (!content.querySelector(".applied-badge")) {
+        const badge = document.createElement("div");
+        badge.className = "applied-badge";
+        badge.textContent = "Applied";
+        content.insertBefore(badge, content.firstChild);
+      }
+
+      const meta = content.querySelector(".job-meta");
+      const savedAt = meta.querySelector(".saved-at");
+      if (savedAt) savedAt.remove();
+
+      const appliedAt = document.createElement("span");
+      appliedAt.className = "applied-at";
+      const now = new Date().toISOString().slice(0, 19);
+      appliedAt.textContent = `Applied ${now}`;
+      card.dataset.appliedAt = now;
+      meta.appendChild(appliedAt);
+
+      const actions = card.querySelector(".job-actions");
+      const jobUrl = card.dataset.jobUrl;
+      actions.innerHTML = `
+        <a class="apply-btn" href="${jobUrl}" target="_blank" rel="noopener noreferrer">View Job →</a>
+        <button class="undo-applied-btn" type="button" data-action="undo">Move Back to Open</button>
+      `;
+      return card;
+    }
+
+    function buildOpenCard(card) {
+      card.classList.remove("applied-card");
+
+      const badge = card.querySelector(".applied-badge");
+      if (badge) badge.remove();
+
+      const appliedAt = card.querySelector(".applied-at");
+      if (appliedAt) appliedAt.remove();
+
+      const actions = card.querySelector(".job-actions");
+      const jobUrl = card.dataset.jobUrl;
+      actions.innerHTML = `
+        <a class="apply-btn" href="${jobUrl}" target="_blank" rel="noopener noreferrer">Apply →</a>
+        <button class="mark-applied-btn" type="button" data-action="apply">Mark as Applied</button>
+      `;
+      return card;
+    }
+
+    async function setAppliedStatus(card, applied) {
+      const jobId = card.dataset.jobId;
+      const response = await fetch("/api/jobs/applied", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: jobId, applied }),
+      });
+
+      if (!response.ok) {
+        alert("Could not update job status. Please try again.");
+        return false;
+      }
+
+      if (applied) {
+        buildAppliedCard(card);
+        appliedJobsList.prepend(card);
+      } else {
+        buildOpenCard(card);
+        openJobsList.prepend(card);
+      }
+
+      applyFilters();
+      return true;
+    }
+
+    document.addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+
+      const card = button.closest(".job-card");
+      if (!card) return;
+
+      const action = button.dataset.action;
+      button.disabled = true;
+
+      try {
+        if (action === "apply") {
+          await setAppliedStatus(card, true);
+        } else if (action === "undo") {
+          await setAppliedStatus(card, false);
+        }
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    function clearFilters() {
+      searchTitle.value = "";
+      searchKeyword.value = "";
+      filterCompany.value = "";
+      filterLocation.value = "";
+      filterPosted.value = "";
+      filterSaved.value = "";
+      sortBy.value = "posted-asc";
+      applyFilters();
+    }
+
+    [searchTitle, searchKeyword, filterCompany, filterLocation,
+     filterPosted, filterSaved, sortBy].forEach(el => {
+      el.addEventListener("input", applyFilters);
+      el.addEventListener("change", applyFilters);
+    });
+
+    clearBtn.addEventListener("click", clearFilters);
+    applyFilters();
+  </script>
+  {% endif %}
+</body>
+</html>

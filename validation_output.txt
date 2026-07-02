@@ -1,0 +1,95 @@
+﻿
+============================================================
+Tested 183 companies ù 88 FAILED
+
+  [422] Netflix (workday) -> netflix/wd1/Netflix
+  [422] Microsoft (workday) -> microsoft/wd1/Careers
+  [404] Notion (greenhouse) -> notion
+  [404] Snowflake (greenhouse) -> snowflake
+  [404] DoorDash (greenhouse) -> doordash
+  [404] Plaid (greenhouse) -> plaid
+  [404] Ramp (greenhouse) -> ramp
+  [404] Rippling (greenhouse) -> rippling
+  [404] HashiCorp (greenhouse) -> hashicorp
+  [404] Confluent (greenhouse) -> confluent
+  [404] Redis (greenhouse) -> redis
+  [404] Retool (greenhouse) -> retool
+  [404] CrowdStrike (greenhouse) -> crowdstrike
+  [404] Shopify (greenhouse) -> shopify
+  [404] Wayfair (greenhouse) -> wayfair
+  [404] Zillow (greenhouse) -> zillow
+  [404] Uber (greenhouse) -> uber
+  [404] Snap (greenhouse) -> snapchat
+  [404] Snyk (greenhouse) -> snyk
+  [404] Linear (greenhouse) -> linear
+  [404] Palantir (greenhouse) -> palantir
+  [404] SentinelOne (greenhouse) -> sentinelone
+  [404] Monday.com (greenhouse) -> mondaydotcom
+  [404] Grab (greenhouse) -> grab
+  [404] Redfin (greenhouse) -> redfin
+  [404] Rivian (greenhouse) -> rivian
+  [404] Unity (greenhouse) -> unity
+  [404] OpenAI (greenhouse) -> openai
+  [404] Cohere (greenhouse) -> cohere
+  [404] Hugging Face (greenhouse) -> huggingface
+  [404] Replit (greenhouse) -> replit
+  [404] Supabase (greenhouse) -> supabase
+  [404] Canva (greenhouse) -> canva
+  [404] Grammarly (greenhouse) -> grammarly
+  [404] Deel (greenhouse) -> deel
+  [404] Spotify (greenhouse) -> spotify
+  [404] Kraken (greenhouse) -> kraken
+  [404] Wise (greenhouse) -> wise
+  [404] Revolut (greenhouse) -> revolut
+  [404] Gong (greenhouse) -> gong
+  [404] Weights & Biases (greenhouse) -> wandb
+  [404] Mistral AI (greenhouse) -> mistralai
+  [422] ServiceNow (workday) -> servicenow/wd1/Careers
+  [401] Intuit (workday) -> intuit/wd1/Intuit
+  [422] AMD (workday) -> amd/wd1/External
+  [422] IBM (workday) -> ibm/wd1/IBM
+  [422] Oracle (workday) -> oracle/wd1/Oracle
+  [422] SAP (workday) -> sap/wd3/SAPCareers
+  [422] Qualcomm (workday) -> qualcomm/wd1/External
+  [422] Texas Instruments (workday) -> texasinstruments/wd1/TI
+  [404] Perplexity (greenhouse) -> perplexityai
+  [404] Zoom (greenhouse) -> zoom
+  [404] Wix (greenhouse) -> wix
+  [404] Freshworks (greenhouse) -> freshworks
+  [404] Zendesk (greenhouse) -> zendesk
+  [404] Miro (greenhouse) -> miro
+  [404] Loom (greenhouse) -> loom
+  [404] Benchling (greenhouse) -> benchling
+  [404] Klarna (greenhouse) -> klarna
+  [404] Etsy (greenhouse) -> etsy
+  [404] eBay (greenhouse) -> ebay
+  [404] Expedia (greenhouse) -> expedia
+  [404] Booking.com (greenhouse) -> booking
+  [404] Opendoor (greenhouse) -> opendoor
+  [404] Procore (greenhouse) -> procore
+  [404] Autodesk (greenhouse) -> autodesk
+  [404] Dynatrace (greenhouse) -> dynatrace
+  [404] Sourcegraph (greenhouse) -> sourcegraph
+  [404] 1Password (greenhouse) -> 1password
+  [404] Docusign (greenhouse) -> docusign
+  [404] Box (greenhouse) -> box
+  [404] Productboard (greenhouse) -> productboard
+  [404] FullStory (greenhouse) -> fullstory
+  [404] Hinge (greenhouse) -> hinge
+  [404] Bumble (greenhouse) -> bumble
+  [404] Tesla (greenhouse) -> tesla
+  [404] Atlassian (greenhouse) -> atlassian
+  [404] GitHub (greenhouse) -> github
+  [404] Runway (greenhouse) -> runwayml
+  [404] Glean (greenhouse) -> glean
+  [404] Faire (greenhouse) -> fairewholesale
+  [404] Aurora (greenhouse) -> aurora
+  [404] Cruise (greenhouse) -> getcruise
+  [422] Amazon (workday) -> amazon/wd5/Amazon
+  [422] Synopsys (workday) -> synopsys/wd1/Synopsys_Careers
+  [401] Siemens (workday) -> siemens/wd3/Siemens_Careers
+  [422] Honeywell (workday) -> honeywell/wd5/Honeywell
+  [422] GE (workday) -> ge/wd5/GE_External_Site
+============================================================
+
+FAILED_NAMES=Netflix,Microsoft,Notion,Snowflake,DoorDash,Plaid,Ramp,Rippling,HashiCorp,Confluent,Redis,Retool,CrowdStrike,Shopify,Wayfair,Zillow,Uber,Snap,Snyk,Linear,Palantir,SentinelOne,Monday.com,Grab,Redfin,Rivian,Unity,OpenAI,Cohere,Hugging Face,Replit,Supabase,Canva,Grammarly,Deel,Spotify,Kraken,Wise,Revolut,Gong,Weights & Biases,Mistral AI,ServiceNow,Intuit,AMD,IBM,Oracle,SAP,Qualcomm,Texas Instruments,Perplexity,Zoom,Wix,Freshworks,Zendesk,Miro,Loom,Benchling,Klarna,Etsy,eBay,Expedia,Booking.com,Opendoor,Procore,Autodesk,Dynatrace,Sourcegraph,1Password,Docusign,Box,Productboard,FullStory,Hinge,Bumble,Tesla,Atlassian,GitHub,Runway,Glean,Faire,Aurora,Cruise,Amazon,Synopsys,Siemens,Honeywell,GE
