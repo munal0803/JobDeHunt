@@ -1,11 +1,19 @@
+import html
+import re
+import time
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 
 from filters import WORKDAY_SEARCH_TEXT, is_recently_posted
 
 # 5 pages × 20 jobs = 100 raw jobs max per company (fast scan).
 MAX_WORKDAY_PAGES = 5
 MAX_RAW_JOBS = 100
+
+LINKEDIN_SEARCH_URL = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+LINKEDIN_PAGE_SIZE = 25
+LINKEDIN_MAX_PAGES = 2  # keep volume low against an unofficial, ToS-restricted endpoint
+LINKEDIN_PAGE_DELAY_SECONDS = 2
 
 WORKDAY_HEADERS = {
     "Accept": "application/json",
@@ -148,5 +156,136 @@ def greenhouse_jobs(company):
                 "posted_at": first_published,
             }
         )
+
+    return jobs
+
+
+def _xml_field(block, tag):
+    match = re.search(rf"<{tag}>(.*?)</{tag}>", block, re.DOTALL)
+    if not match:
+        return ""
+    value = match.group(1).strip()
+    if value.startswith("<![CDATA[") and value.endswith("]]>"):
+        value = value[len("<![CDATA["):-len("]]>")]
+    # Feed double-escapes entities (e.g. &amp;#39;), so unescape twice.
+    return html.unescape(html.unescape(value)).strip()
+
+
+def successfactors_jobs(company):
+    """SAP SuccessFactors career sites expose active postings via a hidden
+    Google-for-Jobs XML feed at /sitemap.xml. It has no posting date field
+    (only expiration_date), so every job is treated as posted "today" on
+    each fetch; id-based dedup in database.py prevents re-notification.
+    """
+    feed_url = company["feed_url"]
+    company_name = company["name"]
+
+    try:
+        response = requests.get(
+            feed_url,
+            headers={"User-Agent": WORKDAY_HEADERS["User-Agent"], "Accept": "application/xml"},
+            timeout=30,
+        )
+    except requests.RequestException as exc:
+        print(f"[successfactors] {company_name}: request failed - {exc}")
+        return []
+
+    if response.status_code != 200:
+        print(f"[successfactors] {company_name}: feed returned {response.status_code}")
+        return []
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    jobs = []
+
+    for block in re.findall(r"<item>(.*?)</item>", response.text, re.DOTALL):
+        title = _xml_field(block, "title")
+        link = _xml_field(block, "link")
+        job_id = _xml_field(block, "id") or _xml_field(block, "guid")
+        location = _xml_field(block, "location")
+
+        if not title or not link:
+            continue
+
+        jobs.append(
+            {
+                "id": job_id or link,
+                "company": company_name,
+                "title": title,
+                "location": location or "Not specified",
+                "url": link,
+                "posted_on": "today",
+                "posted_at": now_iso,
+            }
+        )
+
+    return jobs
+
+
+def _parse_linkedin_card(card):
+    id_match = re.search(r'data-entity-urn="urn:li:jobPosting:(\d+)"', card)
+    title_match = re.search(r'<h3 class="base-search-card__title">\s*(.*?)\s*</h3>', card, re.DOTALL)
+    company_match = re.search(r'<h4 class="base-search-card__subtitle">.*?>\s*([^<]+?)\s*</a>', card, re.DOTALL)
+    location_match = re.search(r'<span class="job-search-card__location">\s*(.*?)\s*</span>', card, re.DOTALL)
+    date_match = re.search(r'<time[^>]*datetime="([^"]+)"', card)
+    url_match = re.search(r'<a class="base-card__full-link[^"]*"[^>]*href="([^"]+)"', card)
+
+    if not (id_match and title_match and url_match):
+        return None
+
+    return {
+        "id": f"linkedin-{id_match.group(1)}",
+        "company": html.unescape(company_match.group(1)).strip() if company_match else "Unknown",
+        "title": html.unescape(title_match.group(1)).strip(),
+        "location": html.unescape(location_match.group(1)).strip() if location_match else "Not specified",
+        "url": html.unescape(url_match.group(1)).split("?")[0],
+        "posted_on": "",
+        "posted_at": date_match.group(1) if date_match else "",
+    }
+
+
+def linkedin_jobs(company):
+    """LinkedIn has no public jobs API. This hits their unofficial, unauthenticated
+    "guest" search endpoint used by the public job search page. It's not sanctioned
+    for automated use, so we page shallowly (LINKEDIN_MAX_PAGES) with a delay between
+    requests to stay low-volume, and treat any failure/block as a soft skip.
+    """
+    keywords = company.get("keywords", "")
+    location = company.get("location", "India")
+    company_label = company["name"]
+
+    jobs = []
+    seen_ids = set()
+
+    for page in range(LINKEDIN_MAX_PAGES):
+        params = {"keywords": keywords, "location": location, "start": page * LINKEDIN_PAGE_SIZE}
+        try:
+            response = requests.get(
+                LINKEDIN_SEARCH_URL,
+                params=params,
+                headers={"User-Agent": WORKDAY_HEADERS["User-Agent"]},
+                timeout=20,
+            )
+        except requests.RequestException as exc:
+            print(f"[linkedin] {company_label}: request failed - {exc}")
+            break
+
+        if response.status_code != 200:
+            print(f"[linkedin] {company_label}: search returned {response.status_code}")
+            break
+
+        cards = re.findall(r"<li>(.*?)</li>", response.text, re.DOTALL)
+        if not cards:
+            break
+
+        for card in cards:
+            job = _parse_linkedin_card(card)
+            if job and job["id"] not in seen_ids:
+                seen_ids.add(job["id"])
+                jobs.append(job)
+
+        if len(cards) < LINKEDIN_PAGE_SIZE:
+            break
+        if page < LINKEDIN_MAX_PAGES - 1:
+            time.sleep(LINKEDIN_PAGE_DELAY_SECONDS)
 
     return jobs

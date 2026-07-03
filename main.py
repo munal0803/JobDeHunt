@@ -1,6 +1,6 @@
 from companies import companies
 from database import delete_excluded_title_jobs, job_exists, save_job
-from fetchers import greenhouse_jobs, workday_jobs
+from fetchers import greenhouse_jobs, linkedin_jobs, successfactors_jobs, workday_jobs
 from filters import TITLE_EXCLUDE_KEYWORDS, apply_job_pipeline, is_recently_posted
 
 
@@ -20,6 +20,10 @@ def run():
                 jobs = greenhouse_jobs(company)
             elif company["type"] == "workday":
                 jobs = workday_jobs(company)
+            elif company["type"] == "successfactors":
+                jobs = successfactors_jobs(company)
+            elif company["type"] == "linkedin":
+                jobs = linkedin_jobs(company)
             else:
                 print(f"Unknown company type: {company['type']}")
                 continue

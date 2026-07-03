@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 WORKDAY_SEARCH_TEXT = "India"
 
 # Only include jobs posted within this many days (inclusive).
-MAX_POSTED_DAYS = 2
+MAX_POSTED_DAYS = 5
 
 # After date filter, keep only this many most-recent jobs before title/location filters.
 TOP_JOBS_LIMIT = 100

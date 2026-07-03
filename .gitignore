@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+env/
+evn/
+venv/
+.venv/
+jobs.db
+validation_output.txt
+validation_report.json
+.claude/
